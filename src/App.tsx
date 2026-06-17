@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowDownRight,
   ArrowUpRight,
   Building2,
+  FileDown,
+  FileUp,
   Eye,
   EyeOff,
   Landmark,
@@ -42,6 +44,11 @@ import {
   getLockTimeoutMinutes,
   setLockTimeoutMinutes,
 } from "./security/session";
+import {
+  downloadWorkbook,
+  exportWealthWorkbook,
+  importWealthWorkbook,
+} from "./excel/workbook";
 import "./styles.css";
 
 type View = "dashboard" | "data" | "transactions" | "settings";
@@ -415,6 +422,8 @@ function DataEditor({
 }) {
   const [draft, setDraft] = useState(data);
   const [saving, setSaving] = useState(false);
+  const [importMessage, setImportMessage] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => setDraft(data), [data]);
 
   async function save() {
@@ -426,13 +435,52 @@ function DataEditor({
     }
   }
 
+  async function exportExcel(mode: "data" | "template") {
+    const blob = await exportWealthWorkbook(draft, mode);
+    const suffix = mode === "template" ? "模板" : draft.targets.month || "数据";
+    downloadWorkbook(blob, `财富罗盘-${suffix}.xlsx`);
+  }
+
+  async function importExcel(file: File | undefined) {
+    if (!file) return;
+    try {
+      setDraft(await importWealthWorkbook(file));
+      setImportMessage("已导入到编辑区，确认无误后点击“保存全部”。");
+    } catch (error) {
+      setImportMessage(error instanceof Error ? error.message : "Excel 导入失败");
+    } finally {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  }
+
   return (
     <div className="content-stack">
       <section className="section-toolbar sticky-toolbar">
         <p>这里录入的数据会写入本机 SQLCipher 加密数据库。</p>
-        <button className="primary-button compact" disabled={saving} onClick={() => void save()}>
-          <Save size={16} />{saving ? "保存中..." : "保存全部"}
-        </button>
+        <div className="toolbar-actions">
+          {importMessage && <span className="save-notice">{importMessage}</span>}
+          <input
+            ref={fileInputRef}
+            className="hidden-input"
+            type="file"
+            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            onChange={(event) => void importExcel(event.target.files?.[0])}
+          />
+          <button className="secondary-button compact" onClick={() => fileInputRef.current?.click()}>
+            <FileUp size={16} />导入 Excel
+          </button>
+          <button className="secondary-button compact" onClick={() => void exportExcel("template")}>
+            <FileDown size={16} />导出模板
+          </button>
+          <button className="secondary-button compact" onClick={() => void exportExcel("data")}>
+            <FileDown size={16} />导出数据
+          </button>
+          <button className="primary-button compact" disabled={saving} onClick={() => void save()}>
+            <Save size={16} />{saving ? "保存中..." : "保存全部"}
+          </button>
+        </div>
       </section>
 
       <section className="editor-grid">

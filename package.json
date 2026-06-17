@@ -1,7 +1,7 @@
 {
   "name": "wealth-compass",
   "private": true,
-  "version": "0.2.1",
+  "version": "0.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,6 +15,7 @@
     "@tauri-apps/api": "^2.5.0",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.468.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
