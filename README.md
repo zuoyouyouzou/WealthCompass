@@ -15,6 +15,8 @@ npm.cmd run dev
 npm.cmd run tauri dev
 ```
 
+Docker 迁移和源码校验方式见 [docs/docker.md](docs/docker.md)。
+
 ## 安全边界
 
 - 主密码只在输入和 Tauri IPC 调用期间短暂存在，不会持久化到浏览器存储。

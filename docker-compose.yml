@@ -1,0 +1,18 @@
+services:
+  wealth-compass:
+    build:
+      context: .
+    working_dir: /app
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+      - cargo_registry:/root/.cargo/registry
+      - cargo_git:/root/.cargo/git
+      - cargo_target:/app/src-tauri/target
+    command: bash
+
+volumes:
+  node_modules:
+  cargo_registry:
+  cargo_git:
+  cargo_target:
